@@ -2,8 +2,6 @@ import styled from 'styled-components';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-//  마이페이지 보호자 아이콘 메뉴
-
 const MyPetsitterMenu = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const handleMouseOver = (itemId: string) => {
@@ -20,7 +18,7 @@ const MyPetsitterMenu = () => {
       id: '/reservation',
       originalImage: 'imgs/Calendar.svg',
       hoveredImage: 'imgs/CalendarBlue.svg',
-      title: '나의 예약',
+      title: '예약 관리',
     },
     {
       id: '/cares',
@@ -76,6 +74,7 @@ const MenuItem = styled.button`
 const MenuItemWrapper = styled.div`
   display: flex;
   flex-direction: column;
+
   &:hover {
     color: ${(props) => props.theme.colors.mainBlue};
   }
@@ -93,6 +92,6 @@ const Title = styled.span`
 
 const StyledLink = styled(Link)`
   text-decoration: none;
-  color: #000000;
+  color: #000;
 `;
 export default MyPetsitterMenu;

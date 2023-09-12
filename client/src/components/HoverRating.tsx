@@ -32,7 +32,6 @@ const StyledRating = styled(Rating)({
 
 export default function CustomizedRating({ value, setValue }: any) {
   const [hover, setHover] = useState(-1);
-  console.log(value);
 
   return (
     <Box
@@ -45,7 +44,7 @@ export default function CustomizedRating({ value, setValue }: any) {
     >
       <StyledRating
         name="customized-color"
-        defaultValue={value}
+        value={value}
         precision={1}
         getLabelText={getLabelText}
         onChange={(_, newValue) => {

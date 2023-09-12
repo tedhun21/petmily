@@ -59,9 +59,15 @@ const CareCard = ({ reservation }: any) => {
               <InActiveButton>예약확정</InActiveButton>
               <ActiveButton>취소하기</ActiveButton>
             </>
-          ) : petsitterBoolean && reservation.progress === 'RESERVATION_FINISHING' ? (
+          ) : petsitterBoolean && reservation.progress === 'RESERVATION_CANCELLED' ? (
             <>
-              <ActiveButton>케어일지</ActiveButton>
+              <InActiveButton>고객에 의해 취소</InActiveButton>
+            </>
+          ) : petsitterBoolean && reservation.progress === 'FINISH_CARING' ? (
+            <>
+              <ActiveLink to={`/cares/${reservation.petsitterId}/${reservation.reservationId}/journal`}>
+                케어일지
+              </ActiveLink>
             </>
           ) : null}
           {!petsitterBoolean && reservation.progress == 'RESERVATION_REQUEST' ? (
@@ -75,7 +81,7 @@ const CareCard = ({ reservation }: any) => {
             </>
           ) : !petsitterBoolean && reservation.progress === 'RESERVATION_CANCELLED' ? (
             <>
-              <InActiveButton>취소됨</InActiveButton>
+              <InActiveButton>펫시터에 의해 취소</InActiveButton>
             </>
           ) : !petsitterBoolean && reservation.progress === 'FINISH_CARING' ? (
             <>
@@ -123,6 +129,7 @@ const PetsitterInfo = styled.div`
   display: flex;
   gap: 4px;
   align-items: flex-end;
+
   div:nth-child(1) {
     ${(props) => props.theme.fontSize.s16h24}
   }
@@ -136,9 +143,11 @@ const PetsitterInfo = styled.div`
 const PetInfo = styled.div`
   display: flex;
   gap: 4px;
+
   > label {
     ${({ theme }) => theme.fontSize.s14h21}
   }
+
   > div {
     ${({ theme }) => theme.fontSize.s14h21}
   }
@@ -203,6 +212,7 @@ const ActiveButton = styled.button`
   &:hover {
     background-color: ${({ theme }) => theme.colors.subBlue};
   }
+
   &:active {
     background-color: ${({ theme }) => theme.colors.darkBlue};
     box-shadow: ${({ theme }) => theme.shadow.inset};
@@ -220,6 +230,7 @@ const ActiveLink = styled(Link)`
   &:hover {
     background-color: ${({ theme }) => theme.colors.subBlue};
   }
+
   &:active {
     background-color: ${({ theme }) => theme.colors.darkBlue};
     box-shadow: ${({ theme }) => theme.shadow.inset};

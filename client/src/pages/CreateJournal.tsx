@@ -74,8 +74,10 @@ const CreateJournal = () => {
     }
   };
 
+  console.log(reservation);
+
   useEffect(() => {
-    if (isLogin /* && petsitterBoolean */) {
+    if (isLogin && petsitterBoolean) {
       try {
         axios.get(`${apiUrl}/reservations/${reservationId}`).then((res) => setReservation(res.data));
       } catch (error: any) {
@@ -188,10 +190,10 @@ const Title = styled.h1`
 `;
 
 const ReservationContainer = styled.div`
-  border-radius: 8px;
-  border: none;
-  box-shadow: ${(props) => props.theme.shadow.dp02};
   padding: 8px;
+  border: none;
+  border-radius: 8px;
+  box-shadow: ${(props) => props.theme.shadow.dp02};
 `;
 
 const ImgPhoto = styled.img`
@@ -222,10 +224,12 @@ const ClientInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
+
   div:nth-child(1) {
     ${(props) => props.theme.fontSize.s14h21}
     color:${(props) => props.theme.textColors.gray40}
   }
+
   dit:nth-child(2) {
     ${(props) => props.theme.fontSize.s16h24}
   }
@@ -256,8 +260,8 @@ const ImgPreview = styled.div`
 
 const ImgPrevieItem = styled.div`
   position: relative;
-  padding: 4px;
   margin: 2px;
+  padding: 4px;
 `;
 
 const Img = styled.img`
@@ -277,9 +281,11 @@ const ImgSelectButton = styled.button`
   border-radius: 4px;
   color: white;
   white-space: nowrap;
+
   &:hover {
     background-color: ${(props) => props.theme.colors.subBlue};
   }
+
   &:active {
     background-color: ${(props) => props.theme.colors.darkBlue};
     box-shadow: ${(props) => props.theme.shadow.inset};
@@ -290,20 +296,21 @@ const ImgSelectWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
+
   > div {
     ${({ theme }) => theme.fontSize.s12h18}
   }
 `;
 
 const RemoveButton = styled.button`
-  background-color: ${(props) => props.theme.textColors.primary};
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 20px;
   height: 20px;
-  border-radius: 50%;
   border: 1px solid ${(props) => props.theme.lineColors.coolGray80};
-  position: absolute;
-  right: 0;
-  top: 0;
+  border-radius: 50%;
+  background-color: ${(props) => props.theme.textColors.primary};
 `;
 
 const TextContainer = styled.div`
@@ -334,9 +341,11 @@ const ButtonContainer = styled.div`
     border-radius: 8px;
     border: none;
     color: white;
+
     &:hover {
       background-color: ${({ theme }) => theme.colors.subBlue};
     }
+
     &:active {
       background-color: ${({ theme }) => theme.colors.darkBlue};
       box-shadow: ${({ theme }) => theme.shadow.inset};
