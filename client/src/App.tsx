@@ -10,6 +10,7 @@ import Signup from '@pages/Signup';
 
 import Mypage from './pages/Mypage';
 import EditUserProfile from './pages/EditUserProfile';
+import ViewPetsitters from './pages/ViewPetsitters';
 import Reservation from './pages/Reservation';
 import ReservationStepTwo from '@pages/ReservationStepTwo';
 import ReservationStepThree from '@pages/ReservationStepThree';
@@ -24,6 +25,7 @@ import CreateReview from './pages/CreateReview';
 import NotFound from '@pages/404';
 import CreateJournal from '@pages/CreateJournal';
 import SitterSchedule from '@pages/SitterSchedule';
+import OAuthBranch from '@pages/OAuthBranch';
 
 const Container = styled.div`
   display: flex;
@@ -83,15 +85,17 @@ const App = () => {
               <Route path="reservation/step3" element={<ReservationStepThree />}></Route>
               <Route path="cares/:memberId" element={<Cares />} />
               <Route path="cares/:memberId/:reservationId/review" element={<CreateReview />} />
-              <Route path="cares/:petsitterId/:reservationId/journal" element={<CreateJournal />} />
+              <Route path="cares/:memberId/:reservationId/journal" element={<CreateJournal />} />
             </Route>
             <Route path="/" element={<BackHeaderLayout />}>
               <Route path="login" element={<Login />} />
               <Route path="signup" element={<Signup />} />
+              <Route path="signup/branch" element={<OAuthBranch />} />
               <Route path="mypage/edit" element={<EditUserProfile />} />
               <Route path="mypage/register" element={<RegisterPet />} />
               <Route path="mypage/:petId/edit" element={<EditPet />}></Route>
               <Route path="search" element={<Search />} />
+              <Route path="petsitters" element={<ViewPetsitters />}></Route>
               <Route path="petsitters/:petsitterId" element={<PetsitterViewDetails />}></Route>
               <Route path="petsitters/:memberId/schedule" element={<SitterSchedule />}></Route>
             </Route>
