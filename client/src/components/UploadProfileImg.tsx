@@ -8,25 +8,34 @@ import { IUser } from 'store/userSlice';
 
 //  DefaultUserProfile 이미지 안보임
 //  모달 디자인
-
+// 사용
+{
+  /* <UploadProfileImg
+          currentImageUrl={imageFile ? URL.createObjectURL(imageFile) : defaultProfileImg}
+          setImageFile={handleImageFileChange}
+          defaultProfileImg="/imgs/PetProfile.png"
+        /> */
+}
 const apiUrl = process.env.REACT_APP_API_URL;
 const BucketUrl = process.env.REACT_APP_BUCKET_URL;
-const defaultProfileImg = '/imgs/DefaultUserProfile.jpg';
 
-const UploadProfileImg = ({ petId, setImageFile, currentImageUrl }: any) => {
+const UploadProfileImg = ({ petId, setImageFile, currentImageUrl, defaultProfileImg }: any) => {
   const [previewImage, setPreviewImage] = useState<string | null>(currentImageUrl);
   const fileInputRef = React.createRef<HTMLInputElement>();
   const [openModal, setOpenModal] = useState(false);
   const { memberId } = useSelector((state: IUser) => state.user);
+  const [isImageOnServer, setImageOnServer] = useState<boolean>(false);
 
   useEffect(() => {
     if (currentImageUrl) {
       setPreviewImage(currentImageUrl.replace(/https:\/\/bucketUrl/g, BucketUrl));
+      setImageOnServer(true);
     } else {
       console.log(defaultProfileImg);
       setPreviewImage(defaultProfileImg);
+      setImageOnServer(false);
     }
-  }, [currentImageUrl]);
+  }, [currentImageUrl, defaultProfileImg]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -57,39 +66,45 @@ const UploadProfileImg = ({ petId, setImageFile, currentImageUrl }: any) => {
   };
 
   const handleDelete = async () => {
-    const token = getCookieValue('access_token');
-    try {
-      let endpoint;
-      if (petId) {
-        endpoint = `${apiUrl}/pets/${petId}/photo`;
-      } else {
-        endpoint = `${apiUrl}/members/${memberId}/photo`;
-      }
-
-      const response = await axios.patch(endpoint, null, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.data) {
-        alert('삭제되었습니다');
-        setPreviewImage(defaultProfileImg);
-        setImageFile(null);
-        handleCloseModal();
-      }
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        if (error.response) {
-          console.error(error.response.data);
+    if (isImageOnServer) {
+      const token = getCookieValue('access_token');
+      try {
+        let endpoint;
+        // 펫 유저 사진 엔드 포인트 나누는 방법
+        if (petId) {
+          endpoint = `${apiUrl}/pets/${petId}/photo`;
         } else {
-          console.error('AxiosError caught (no response):', error.message);
+          endpoint = `${apiUrl}/members/${memberId}/photo`;
         }
-      } else {
-        console.error('Non-Axios error caught:', error);
+
+        const response = await axios.patch(endpoint, null, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.data) {
+          alert('삭제되었습니다');
+          setPreviewImage(defaultProfileImg);
+          setImageFile(null);
+          handleCloseModal();
+        }
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          if (error.response) {
+            console.error(error.response.data);
+          } else {
+            console.error('AxiosError caught (no response):', error.message);
+          }
+        } else {
+          console.error('Non-Axios error caught:', error);
+        }
       }
+    } else {
+      setPreviewImage(defaultProfileImg);
+      setImageFile(null);
+      handleCloseModal();
     }
   };
-
   const handleClickUploadArea = () => {
     handleOpenModal();
   };

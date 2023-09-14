@@ -19,9 +19,6 @@ import { StyledButton } from './EditUserProfile';
 
 // 이름, 나이, 몸무게, 바디, 중성화 수정 가능
 
-const apiUrl = process.env.REACT_APP_API_URL;
-const token = getCookieValue('access_token');
-
 interface IEditPet {
   name: string;
   age: string;
@@ -33,10 +30,15 @@ interface IEditPet {
   photo: string;
 }
 
+const apiUrl = process.env.REACT_APP_API_URL;
+
 const EditPet = () => {
   const navigate = useNavigate();
 
+  // 펫아이디 나오는지 확인
   const { petId } = useParams();
+  console.log(petId);
+
   const [pet, setPet] = useState<IEditPet>({
     name: '',
     age: '',
@@ -48,15 +50,8 @@ const EditPet = () => {
     photo: '',
   });
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-
-  const handleImageFileChange = (file: File) => {
-    setImageFile(file);
-  };
-
-  const { register, handleSubmit } = useForm<IEditPet>();
-
   useEffect(() => {
+    const token = getCookieValue('access_token');
     const fetchPetData = async () => {
       try {
         const response = await axios.get(`${apiUrl}/pets/${petId}`, {
@@ -73,7 +68,15 @@ const EditPet = () => {
       }
     };
     fetchPetData();
-  }, [petId]);
+  }, []);
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const handleImageFileChange = (file: File) => {
+    setImageFile(file);
+  };
+
+  const { register, handleSubmit } = useForm<IEditPet>();
 
   const onSubmit = async (data: IEditPet) => {
     const token = getCookieValue('access_token');
@@ -160,7 +163,12 @@ const EditPet = () => {
         <StyledButton onClick={deletePet}>삭제</StyledButton>
       </BtnContainer>
       <MainContainer>
-        <UploadProfileImg petId={petId} currentImageUrl={pet.photo} setImageFile={handleImageFileChange} />
+        <UploadProfileImg
+          petId={petId}
+          currentImageUrl={pet.photo}
+          setImageFile={handleImageFileChange}
+          defaultProfileImg="/imgs/PetProfile.png"
+        />
         <InputContainer onSubmit={handleSubmit(onSubmit)}>
           <RegisterInputWrapper>
             <InputLabelStyle htmlFor="name">이름</InputLabelStyle>
