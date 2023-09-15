@@ -1,4 +1,4 @@
-import { PulseLoader } from 'react-spinners';
+import { BarLoader } from 'react-spinners';
 import styled from 'styled-components';
 
 const LoadingFallback = () => (
@@ -8,15 +8,8 @@ const LoadingFallback = () => (
 );
 export default LoadingFallback;
 
-const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-`;
+const Container = styled.div``;
 
-const Loader = styled(PulseLoader)`
-  display: flex;
-
+const Loader = styled(BarLoader)`
   color: ${({ theme }) => theme.colors.mainBlue};
 `;
