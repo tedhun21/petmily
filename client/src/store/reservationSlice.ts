@@ -32,7 +32,6 @@ export const reservationSlice = createSlice({
     addPets: (state, action) => {
       state.pets = action.payload.pets;
     },
-
     deleteReservation: (state) => {
       state.reservationDay = '';
       state.reservationTimeStart = '';
@@ -44,5 +43,5 @@ export const reservationSlice = createSlice({
   },
 });
 
-export const { setReservation, deleteReservation } = reservationSlice.actions;
+export const { setReservation, addPets, deleteReservation } = reservationSlice.actions;
 export default reservationSlice.reducer;

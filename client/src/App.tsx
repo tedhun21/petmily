@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import styled from 'styled-components';
 
 import BackHeader from '@components/headers/BackHeader';
@@ -7,29 +8,27 @@ import Header from './components/headers/Header';
 import LoadingFallback from '@components/LoadingFallback';
 import NavHeader from '@components/headers/NavHeader';
 
-import { Helmet } from 'react-helmet-async';
-
-const Home = lazy(() => import('@pages/Home'));
-const Login = lazy(() => import('@pages/Login'));
-const Signup = lazy(() => import('@pages/Signup'));
-const Mypage = lazy(() => import('@pages/Mypage'));
-const EditUserProfile = lazy(() => import('@pages/EditUserProfile'));
-const ViewPetsitters = lazy(() => import('@pages/ViewPetsitters'));
-const Reservation = lazy(() => import('@pages/Reservation'));
-const ReservationStepTwo = lazy(() => import('@pages/ReservationStepTwo'));
-const ReservationStepThree = lazy(() => import('@pages/ReservationStepThree'));
-const Cares = lazy(() => import('@pages/Cares'));
-const RegisterPet = lazy(() => import('@pages/RegisterPet'));
-const EditPet = lazy(() => import('@pages/EditPet'));
-const PetsitterViewDetails = lazy(() => import('@pages/PetsitterViewDetails'));
-const Search = lazy(() => import('@pages/Search'));
-const CreateReview = lazy(() => import('@pages/CreateReview'));
-const CreateJournal = lazy(() => import('@pages/CreateJournal'));
-const SitterSchedule = lazy(() => import('@pages/SitterSchedule'));
-const OAuthBranch = lazy(() => import('@pages/OAuthBranch'));
-const ViewJournal = lazy(() => import('@pages/ViewJournal'));
-const QnA = lazy(() => import('@pages/QnA'));
-const NotFound = lazy(() => import('@pages/404'));
+const Home = lazy(() => import('@pages/main/Home'));
+const Login = lazy(() => import('@pages/login/Login'));
+const Signup = lazy(() => import('@pages/login/Signup'));
+const Mypage = lazy(() => import('@pages/mypage/Mypage'));
+const EditUserProfile = lazy(() => import('@pages/mypage/EditUserProfile'));
+const ViewPetsitters = lazy(() => import('@pages/reservation/ViewPetsitters'));
+const Reservation = lazy(() => import('@pages/reservation/Reservation'));
+const ReservationStepTwo = lazy(() => import('@pages/reservation/ReservationStepTwo'));
+const ReservationStepThree = lazy(() => import('@pages/reservation/ReservationStepThree'));
+const Cares = lazy(() => import('@pages/care/Cares'));
+const RegisterPet = lazy(() => import('@pages/mypage/RegisterPet'));
+const EditPet = lazy(() => import('@pages/mypage/EditPet'));
+const PetsitterViewDetails = lazy(() => import('@pages/reservation/PetsitterViewDetails'));
+const Search = lazy(() => import('@pages/main/Search'));
+const CreateReview = lazy(() => import('@pages/care/CreateReview'));
+const CreateJournal = lazy(() => import('@pages/care/CreateJournal'));
+const SitterSchedule = lazy(() => import('@pages/mypage/SitterSchedule'));
+const OAuthBranch = lazy(() => import('@pages/login/OAuthBranch'));
+const ViewJournal = lazy(() => import('@pages/common/ViewJournal'));
+const QnA = lazy(() => import('@pages/main/QnA'));
+const NotFound = lazy(() => import('@pages/common/404'));
 
 const Container = styled.div`
   display: flex;
@@ -87,10 +86,9 @@ const App = () => {
                 <Route path="mypage" element={<Mypage />} />
                 <Route path="reservation" element={<Reservation />} />
                 <Route path="reservation/step2" element={<ReservationStepTwo />}></Route>
-                <Route path="reservation/step3" element={<ReservationStepThree />}></Route>
-                <Route path="cares/:memberId" element={<Cares />} />
-                <Route path="cares/:memberId/:reservationId/review" element={<CreateReview />} />
-                <Route path="cares/:memberId/:reservationId/journal" element={<CreateJournal />} />
+                <Route path="cares" element={<Cares />} />
+                <Route path="cares/:reservationId/review" element={<CreateReview />} />
+                <Route path="cares/:reservationId/journal" element={<CreateJournal />} />
               </Route>
               <Route path="/" element={<BackHeaderLayout />}>
                 <Route path="login" element={<Login />} />
@@ -102,6 +100,7 @@ const App = () => {
                 <Route path="search" element={<Search />} />
                 <Route path="qna" element={<QnA />} />
                 <Route path="petsitters" element={<ViewPetsitters />}></Route>
+                <Route path="reservation/step3" element={<ReservationStepThree />}></Route>
                 <Route path="cares/journal/:journalId" element={<ViewJournal />}></Route>
                 <Route path="petsitters/:petsitterId" element={<PetsitterViewDetails />}></Route>
                 <Route path="petsitters/:memberId/schedule" element={<SitterSchedule />}></Route>
