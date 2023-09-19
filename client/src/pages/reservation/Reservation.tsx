@@ -36,17 +36,19 @@ import isBetween from 'dayjs/plugin/isBetween';
 import { getCookieValue } from 'hooks/getCookie';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { addPets, setReservation } from 'store/reservationSlice';
-import { IUser } from 'store/userSlice';
+import { deleteReservation, setReservation } from 'store/reservationSlice';
+import { IUser, deleteUser } from 'store/userSlice';
 import { refreshAccessToken } from 'hooks/refreshAcessToken';
-
-const apiUrl = process.env.REACT_APP_API_URL;
-const bucketUrl = process.env.REACT_APP_BUCKET_URL;
+import { deleteCookie } from 'hooks/deleteCookie';
 
 interface IFormInput {
   address: string;
+  detailAddress: string;
   error: boolean;
 }
+
+const apiUrl = process.env.REACT_APP_API_URL;
+const bucketUrl = process.env.REACT_APP_BUCKET_URL;
 
 const Reservation = () => {
   const navigate = useNavigate();
@@ -63,7 +65,7 @@ const Reservation = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // submit state
-  const { isLogin } = useSelector((state: IUser) => state.user);
+  const { isLogin, petsitterBoolean } = useSelector((state: IUser) => state.user);
   const [reservationDay, setReservationDay] = useState<any>('');
   const [reservationTimeStart, setReservationTimeStart] = useState<any>('');
   const [reservationTimeEnd, setReservationTimeEnd] = useState('');
@@ -87,14 +89,13 @@ const Reservation = () => {
 
   const [pets, setPets] = useState([]);
 
-  console.log(pets);
   /// Time
   now.setMonth(now.getMonth() + 3);
   const modifiedNow = now.toISOString().slice(0, 10);
 
   // Address
   const [sido, setSido] = useState('');
-  const [sigungu, setSigugu] = useState('');
+  const [sigungu, setSigungu] = useState('');
   const [remainAddress, setRemainAddress] = useState('');
   const [zonecode, setZonecode] = useState('');
 
@@ -129,12 +130,13 @@ const Reservation = () => {
     // 시.도 저장
     setSido(data.sido);
     // 구.군 저장
-    setSigugu(data.sigungu.length > 3 ? data.sigungu.split('').splice(0, 3).join('') : data.sigungu);
+    setSigungu(data.sigungu);
     // 상세주소 앞 2단어 제외하고 저장 ('서울 강남구' 제외하고 저장)
     const splitAddress = data.address.split(' ').splice(2).join(' ');
     if (data) {
       clearErrors('address');
     }
+
     setRemainAddress(splitAddress);
     setIsModalOpen(false);
   };
@@ -153,7 +155,11 @@ const Reservation = () => {
     if (checkedPets.includes(petId)) {
       setCheckedPets(checkedPets.filter((id) => id !== petId));
     } else {
-      setCheckedPets([...checkedPets, petId]);
+      if (checkedPets.length < 3) {
+        setCheckedPets([...checkedPets, petId]);
+      } else {
+        alert('최대 3마리까지만 선택할 수 있습니다.');
+      }
     }
   };
 
@@ -193,7 +199,7 @@ const Reservation = () => {
     }
   };
 
-  // 펫등록 submit
+  // 펫등록 submit (access token 재발급 설정 완료)
   const handlePetSubmit = async () => {
     const accessToken = getCookieValue('access_token');
 
@@ -217,10 +223,10 @@ const Reservation = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log(response);
+
       if (response.status === 201) {
         alert('펫 등록되었습니다.');
-        setIsModalOpen(false);
+        setIsPetModalOpen(false);
       }
     } catch (error: any) {
       console.log(error);
@@ -236,25 +242,45 @@ const Reservation = () => {
             });
             if (response.status === 201) {
               alert('펫 등록되었습니다.');
-              setIsModalOpen(false);
+              setIsPetModalOpen(false);
             }
           }
         } catch (error) {
+          // 에러 설정 해야함 (access token이 재발급 되지 않는 상황)
           console.log(error);
         }
       }
     }
   };
 
+  // 예약 정보 리덕스로 저장
   const onSubmit = async (data: any) => {
-    const { address } = data;
-    if (reservationDay && reservationTimeStart && reservationTimeEnd && address) {
-      console.log({ reservationDay, reservationTimeStart, reservationTimeEnd, address });
-      dispatch(setReservation({ reservationDay, reservationTimeStart, reservationTimeEnd, address }));
-      dispatch(addPets(pets));
+    const { address, detailAddress } = data;
+
+    if (!reservationTimeStart || !reservationTimeEnd) {
+      alert('시간을 확인해주세요.');
+    } else if (checkedPets.length === 0) {
+      alert('맡기실 반려동물을 선택해주세요.');
+    } else if (
+      reservationDay &&
+      reservationTimeStart &&
+      reservationTimeEnd &&
+      address &&
+      detailAddress &&
+      checkedPets.length > 0
+    ) {
+      // console.log({ reservationDay, reservationTimeStart, reservationTimeEnd, address, detailAddress, checkedPets });
+      dispatch(
+        setReservation({
+          reservationDay,
+          reservationTimeStart,
+          reservationTimeEnd,
+          address: `${address} ${detailAddress}`,
+          pets: checkedPets,
+        }),
+      );
+
       navigate('/reservation/step2');
-    } else if (!reservationTimeStart || !reservationTimeEnd) {
-      alert('시간을 확인해주세요');
     }
   };
 
@@ -263,9 +289,13 @@ const Reservation = () => {
       alert('로그인을 해주세요.');
       navigate('/');
     }
+    if (petsitterBoolean) {
+      alert('고객만 이용 가능한 서비스입니다.');
+      navigate('/');
+    }
   });
 
-  // 펫 정보 가져오기 (accessToken)
+  // 펫 정보 가져오기 (accessToken 재발급 설정 완료)
   useEffect(() => {
     const getPets = async () => {
       const accessToken = getCookieValue('access_token');
@@ -288,6 +318,12 @@ const Reservation = () => {
             } catch (refreshError) {
               console.error(refreshError);
               // Refresh Token을 사용하여 새로운 Access Token을 얻는 동안 오류가 발생했을 때 처리
+
+              alert('로그인이 만료되었습니다. 다시 로그인 해주세요');
+              dispatch(deleteUser());
+              dispatch(deleteReservation());
+              deleteCookie('access_token');
+              deleteCookie('refresh_token');
             }
           }
         }
@@ -336,7 +372,18 @@ const Reservation = () => {
                     minTime={dayjs(new Date(0, 0, 0, 8))}
                     maxTime={dayjs(new Date(0, 0, 0, 22))}
                     ampm={false}
-                    shouldDisableTime={(value, view) => view === 'hours' && value.hour() < +nowTime.split(':')[0] + 2}
+                    shouldDisableTime={(value, view) => {
+                      const currentTime = dayjs();
+                      if (!currentTime.isSame(dayjs(reservationDay), 'date')) {
+                        return false;
+                      }
+                      if (view === 'hours') {
+                        if (value.hour() < currentTime.hour() + 2) {
+                          return true;
+                        }
+                      }
+                      return false;
+                    }}
                     onChange={handleStartTime}
                     onError={handleStartError}
                   />
@@ -367,9 +414,7 @@ const Reservation = () => {
         <Container>
           <ScheduleText>어디로 방문할까요?</ScheduleText>
           <TextField
-            id="outlined-basic"
             label="주소를 입력해주세요"
-            variant="outlined"
             fullWidth
             value={zonecode ? `${zonecode} ${sido} ${sigungu} ${remainAddress}` : ''}
             {...register('address', { required: true })}
@@ -377,6 +422,7 @@ const Reservation = () => {
             onClick={onToggleModal}
             onKeyDown={onToggleModal}
           />
+          <TextField label="상세주소를 입력해주세요" fullWidth {...register('detailAddress', { required: true })} />
           {isModalOpen && (
             <Modal
               open={isModalOpen}
@@ -398,19 +444,17 @@ const Reservation = () => {
                 return (
                   <SelectPetCard key={pet.petId}>
                     <PetImgLabel>
-                      <PetImg
-                        src={
-                          pet.photo ? (
-                            pet.photo.replace('https://bucketUrl', bucketUrl)
-                          ) : (
-                            <div style={{ width: '80px', height: '80px', backgroundColor: 'gray' }}>
-                              사진을 등록해 주세요
-                            </div>
-                          )
-                        }
-                        onError={onErrorImg}
-                        alt="펫 사진"
-                      />
+                      <Box style={{ width: '80px', height: '80px', position: 'relative', overflow: 'hidden' }}>
+                        {pet.photo ? (
+                          <PetImg
+                            src={pet.photo && pet.photo.replace('https://bucketUrl', bucketUrl)}
+                            onError={onErrorImg}
+                            alt="펫 사진"
+                          />
+                        ) : (
+                          <PetImg src="/imgs/PetProfile.png" alt="default pet"></PetImg>
+                        )}
+                      </Box>
                       <CheckBoxInput
                         type="checkbox"
                         id={pet.petId}
@@ -758,8 +802,7 @@ const CheckBoxInput = styled.input`
     border-radius: 50%; /* Make the checkmark a circle */
 
     position: absolute;
-    top: 50%;
-    left: 50%;
+
     transform: translate(-50%, -50%);
     transition:
       width 0.3s ease,
@@ -776,8 +819,10 @@ const CheckBoxInput = styled.input`
 const PetImg = styled.img`
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center; /* 이미지를 가운데 정렬하기 위해 필요 */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 `;
 
 const AddPetImg = styled.img`
@@ -789,24 +834,6 @@ const AddPetImg = styled.img`
   cursor: pointer;
 `;
 
-const UploadPetImgbox = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 16px;
-`;
-
-const PetButtonContainer = styled.div`
-  display: flex;
-  /* flex-direction: column; */
-  justify-content: center;
-  height: 32px;
-  border-radius: 8px;
-  overflow: hidden;
-  width: 100%;
-  margin: 16px 0 4px 0;
-`;
-
 const PetButton = styledMui(Button)(({ value }) => ({
   width: '100%',
   backgroundColor: value === 'true' ? '#279EFF' : '#A6A6A6',
@@ -816,34 +843,10 @@ const PetButton = styledMui(Button)(({ value }) => ({
   },
 }));
 
-// display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   cursor: pointer;
-//   width: 100%;
-//   border: none;
-//   background-color: ${(props) => (props.iscat ? props.theme.textColors.gray50 : props.theme.colors.mainBlue)};
-
 const ButtonContainer = styled(Box)`
   display: flex;
   justify-content: center;
   align-items: center;
-`;
-
-const FormContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const GenderContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 80px;
-`;
-
-const GenderRadio = styled.div`
-  display: flex;
-  gap: 12px;
 `;
 
 const StyledButton = styled.button`
