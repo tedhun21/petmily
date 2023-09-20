@@ -32,18 +32,6 @@ interface IEditSchedule {
   possibleLocation?: string[];
 }
 
-type InfoType = {
-  petsitterId: number;
-  possiblePetType: string;
-  possibleLocation: string;
-  possibleDay: string;
-  possibleTimeStart: string;
-  possibleTimeEnd: string;
-  star: number;
-  reviewCount: number;
-  monthTotalReservation: number | null;
-} | null;
-
 const apiUrl = process.env.REACT_APP_API_URL;
 const token = getCookieValue('access_token');
 
@@ -61,7 +49,6 @@ const SitterSchedule = () => {
 
   useEffect(() => {
     const fetchPetData = async () => {
-      console.log(token);
       try {
         const response = await axios.get(`${apiUrl}/members/petsitters`, {
           headers: {
@@ -70,7 +57,7 @@ const SitterSchedule = () => {
         });
         if (response.data) {
           const data = response.data;
-          console.log(data);
+
           // 케어 가능한 펫
           setValue('possiblePetType', data.possiblePetType || '');
           // 케어 가능 요일
@@ -156,7 +143,7 @@ const SitterSchedule = () => {
     data.possibleTimeStart = possibleStartTime?.format('HH:mm') || '';
     data.possibleTimeEnd = possibleEndTime?.format('HH:mm') || '';
     data.possibleLocation = possibleLocation;
-    console.log(data);
+
     try {
       const response = await axios.patch(`${apiUrl}/members/petsitters/${memberId}`, data, {
         headers: {
@@ -167,7 +154,6 @@ const SitterSchedule = () => {
         alert('일정이 저장되었습니다.');
         navigate('/mypage');
       }
-      console.log(response.data);
     } catch (error) {
       console.log(error);
     }
@@ -372,7 +358,7 @@ const MainContainer = styled.main`
   flex-direction: column;
   width: 100%;
   height: 100%;
-  padding: 0px 60px;
+  padding: 0 60px;
 `;
 
 const InputContainer = styled.form`
@@ -387,7 +373,6 @@ const InputContainer = styled.form`
 const RegisterInputWrapper = styled.div`
   display: flex;
   flex-direction: column;
-
   justify-content: space-between;
   width: 100%;
   margin-top: 20px;
@@ -395,17 +380,19 @@ const RegisterInputWrapper = styled.div`
 
 const RadioContainer = styled.div`
   display: flex;
-  width: 100%;
   justify-content: space-between;
+  width: 100%;
   margin-top: 12px;
 `;
 
 const RadioWrapper = styled.div`
   display: flex;
   align-items: center;
+
   & > input[type='radio'] {
     margin-right: 8px;
   }
+
   /* &:last-child {
 margin-right: 16px;
 } */
@@ -414,17 +401,17 @@ margin-right: 16px;
 const CheckboxWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  width: 100%;
   justify-content: space-between;
-  gap: 20px;
+  width: 100%;
   margin-top: 20px;
+  gap: 20px;
 `;
 
 const TimePickerWrapper = styled.div`
   display: flex;
-  width: 100%;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
   margin-top: 12px;
 `;
 

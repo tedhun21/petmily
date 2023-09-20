@@ -125,7 +125,7 @@ const ReservationStepTwo = () => {
       const getNewPetsitters = async () => {
         try {
           const response = await axios.get(`${apiUrl}/members/search`);
-          setProperPetsitters(response.data);
+          setProperPetsitters(response.data.data);
         } catch (error) {
           setProperPetsitters([]);
         }
@@ -135,7 +135,7 @@ const ReservationStepTwo = () => {
       const getHighPetsitters = async () => {
         try {
           const response = await axios.get(`${apiUrl}/members/search?star=0`);
-          setProperPetsitters(response.data);
+          setProperPetsitters(response.data.data);
         } catch (error) {
           setProperPetsitters([]);
         }
@@ -145,7 +145,7 @@ const ReservationStepTwo = () => {
       const getManyReviewsPetsitters = async () => {
         try {
           const response = await axios.get(`${apiUrl}/members/search?reveiwCount=0`);
-          setProperPetsitters(response.data);
+          setProperPetsitters(response.data.data);
         } catch (error) {
           setProperPetsitters([]);
         }
@@ -153,9 +153,6 @@ const ReservationStepTwo = () => {
       getManyReviewsPetsitters();
     }
   }, [filterType]);
-
-  console.log(filterType);
-  console.log(properPetsitters);
 
   return (
     <MainContainer id="steptwo-main">
@@ -219,21 +216,21 @@ export default ReservationStepTwo;
 
 const MainContainer = styled.div`
   display: flex;
+  flex-direction: column;
   position: relative;
   bottom: 0;
-  flex-direction: column;
   width: 100%;
   background-color: #fefdff;
 `;
 
 const StatusHeader = styled.div`
   display: flex;
-  justify-content: space-around;
   align-items: center;
+  justify-content: space-around;
+  position: relative;
   background-color: ${(props) => props.theme.textColors.secondary};
   min-height: 48px;
   gap: 120px;
-  position: relative;
 `;
 
 const BackImg = styled.img`
@@ -269,17 +266,17 @@ const TitleWrap = styled.div`
 `;
 
 const TitleText = styled.div`
-  font-size: ${(props) => props.theme.fontSize.s20h30};
   font-weight: ${(props) => props.theme.fontWeights.extrabold};
+  font-size: ${(props) => props.theme.fontSize.s20h30};
 `;
 
 const ItemCountbox = styled.div`
-  background-color: ${(props) => props.theme.colors.mainBlue};
-  color: ${(props) => props.theme.colors.white};
-  font-size: 14px;
+  margin: 5px 0 5px 8px;
   padding: 2px 5px;
   border-radius: 4px;
-  margin: 5px 0 5px 8px;
+  color: ${(props) => props.theme.colors.white};
+  font-size: 14px;
+  background-color: ${(props) => props.theme.colors.mainBlue};
 `;
 
 const FilterIcon = styled.img`

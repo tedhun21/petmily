@@ -212,9 +212,6 @@ const CreateJournal = () => {
     fetchData();
   }, [reservation]);
 
-  // console.log(reservation);
-  console.log(journal);
-
   return (
     <MainContainer>
       <TitleReservationContainer>
@@ -284,6 +281,7 @@ const CreateJournal = () => {
           placeholder="케어 중 무슨 일이 있었나요?"
           defaultValue={journal?.body && journal?.body}
           onChange={(e) => setJournalText(e.target.value)}
+          maxLength={255}
         />
       </TextContainer>
       <ButtonContainer>

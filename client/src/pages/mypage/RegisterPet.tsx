@@ -66,8 +66,6 @@ const RegisterPet = () => {
   const onSubmit = async (data: IRegisterPet) => {
     const token = getCookieValue('access_token');
 
-    console.log(JSON.stringify(data));
-
     const formData = new FormData();
     if (imageFile) {
       formData.append('file', imageFile);
@@ -81,10 +79,6 @@ const RegisterPet = () => {
     formData.append('male', String(data.male));
     formData.append('neutering', String(data.neutering));
 
-    formData.forEach((value, key) => {
-      console.log(`key: ${key} value: ${value}`);
-    });
-
     try {
       const response = await axios.post(`${apiUrl}/pets/`, formData, {
         headers: {
@@ -93,7 +87,6 @@ const RegisterPet = () => {
         },
       });
       if (response.data) {
-        console.log(response.data);
         alert('펫밀리 등록이 완료되었습니다!');
         navigate('/mypage');
       }
@@ -347,6 +340,7 @@ export const RadioLabel = styled.label`
   ${(props) => props.theme.fontSize.s14h21};
   margin-left: 8px;
   color: ${({ theme }) => theme.textColors.gray60};
+
   input:checked + & {
     color: #279eff;
   }

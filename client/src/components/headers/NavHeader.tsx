@@ -19,7 +19,7 @@ const NavHeader = () => {
   const dispatch = useDispatch();
 
   const { isLogin, memberId, petsitterBoolean } = useSelector((state: IUser) => state.user);
-  console.log('로그인: ', isLogin);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement | null>(null);
 
@@ -80,7 +80,8 @@ const NavHeader = () => {
           dispatch(login());
           dispatch(setUser(response.data));
         } catch (error: any) {
-          if (error.response && error.response.data.status === 401) {
+          console.log(error);
+          if (error.response.data.status === 401 || error.response.data.status === 500) {
             try {
               const newAccessToken = await refreshAccessToken();
               if (newAccessToken) {
@@ -94,7 +95,7 @@ const NavHeader = () => {
               }
             } catch (refreshError) {
               console.error(refreshError);
-              alert('로그인이 만료되었습니다. 다시 로그인 해주세요');
+              alert('로그인 세션이 만료되었습니다. 안전한 서비스 이용을 위해 다시 로그인해 주시기 바랍니다.');
               dispatch(deleteUser());
               deleteCookie('access_token');
               deleteCookie('refresh_token');
@@ -199,15 +200,15 @@ const LoginNavModal = styled.nav`
   align-items: center;
   justify-content: center;
   position: absolute;
-  gap: 12px;
   top: 24px;
   right: 24px;
+  z-index: 999;
   width: 100px;
   height: 80px;
   border-radius: 8px;
   background-color: white;
+  gap: 12px;
   box-shadow: ${(props) => props.theme.shadow.dp03};
-  z-index: 999;
 `;
 
 const MypageLink = styled(Link)`

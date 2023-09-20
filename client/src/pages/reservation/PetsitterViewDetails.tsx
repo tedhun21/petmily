@@ -1,11 +1,12 @@
 import styled from 'styled-components';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { setReservation, setPetsitterId } from 'store/reservationSlice';
 import axios from 'axios';
 
 import { getCookieValue } from 'hooks/getCookie';
 import { refreshAccessToken } from 'hooks/refreshAcessToken';
-import { useSelector } from 'react-redux';
 import { IUser } from 'store/userSlice';
 
 import Button from '@mui/material/Button';
@@ -16,10 +17,6 @@ import dayjs from 'dayjs';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 const bucketUrl = process.env.REACT_APP_BUCKET_URL;
-
-const onErrorImg = (e: any) => {
-  e.target.src = '/imgs/PetProfile.png';
-};
 
 const NavItem = [
   {
@@ -65,13 +62,23 @@ const convertTo12Hour = (time: string) => {
 
 const PetsitterViewDetails = () => {
   const navigate = useNavigate();
+
+  // 리덕스 펫시터 Id 저장
+
+  const { petsitterId } = useParams();
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(setPetsitterId(petsitterId));
+  }, [petsitterId, dispatch]);
+
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [activeTab, setActiveTab] = useState(NavItem[0].link);
   const [selectedDates, setSelectedDates] = useState<dayjs.Dayjs | null>(null);
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
 
   const [petsitterData, setPetsitterData] = useState<any>({});
-  const { petsitterId } = useParams();
 
   const { isLogin, memberId, petsitterBoolean } = useSelector((state: IUser) => state.user);
 
@@ -81,6 +88,7 @@ const PetsitterViewDetails = () => {
   };
 
   const handleBookmarkClick = async () => {
+    // 찜하기 버튼 클릭 시 동작
     const accessToken = getCookieValue('access_token');
     if (isLogin) {
       try {
@@ -93,7 +101,8 @@ const PetsitterViewDetails = () => {
             },
           },
         );
-        setIsBookmarked(response.data.isBookmarked);
+
+        setIsBookmarked(response.data.data);
       } catch (error) {
         console.error(error);
       }
@@ -119,6 +128,15 @@ const PetsitterViewDetails = () => {
   };
 
   const handleOnSubmitButtonClick = () => {
+    // 선택된 날짜와 시간을 스토어에 저장
+    dispatch(
+      setReservation({
+        reservationDay: selectedDates ? selectedDates.format('YYYY-MM-DD') : '',
+        reservationTimeStart: selectedTimes.length > 0 ? selectedTimes[0] : '',
+        reservationTimeEnd: selectedTimes.length > 0 ? selectedTimes[selectedTimes.length - 1] : '',
+      }),
+    );
+
     navigate('/reservation/step3');
   };
 
@@ -136,8 +154,6 @@ const PetsitterViewDetails = () => {
 
     fetchPetsitterData();
   }, [petsitterId]);
-
-  console.log(petsitterData);
 
   return (
     <MainContainer>

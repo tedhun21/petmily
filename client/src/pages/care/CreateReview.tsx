@@ -32,8 +32,6 @@ const CreateReview = () => {
   if (reservation && reservation.reservationDay) {
     [year, month, day] = reservation.reservationDay.split('-');
   }
-  // console.log(reservation);
-  console.log(review);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -185,7 +183,6 @@ const CreateReview = () => {
       try {
         axios.get(`${apiUrl}/reviews/${reservation.reviewId}`).then((res) => {
           if (res.status === 200) {
-            console.log(res.data);
             setReview(res.data);
             setReviewText(res.data.body);
             setStar(res.data.star);
@@ -280,6 +277,7 @@ const CreateReview = () => {
           placeholder="케어는 어떠셨나요?"
           defaultValue={review?.body && review.body}
           onChange={(e) => setReviewText(e.target.value)}
+          maxLength={255}
         />
       </TextContainer>
       <ButtonContainer>
@@ -437,6 +435,7 @@ const ImgSelectWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
+
   > div {
     ${({ theme }) => theme.fontSize.s12h18}
   }

@@ -6,8 +6,10 @@ export interface IReservation {
     reservationTimeStart: string;
     reservationTimeEnd: string;
     address: string;
+    detailAddress: string;
     body: string;
     petId: number[];
+    petsitterId: string;
   };
 }
 
@@ -18,9 +20,10 @@ export const reservationSlice = createSlice({
     reservationTimeStart: '',
     reservationTimeEnd: '',
     address: '',
-    detailAddress: '',
     body: '',
     petId: [],
+    petsitterId: '',
+    pets: [],
   },
   reducers: {
     setReservation: (state, action) => {
@@ -28,7 +31,11 @@ export const reservationSlice = createSlice({
       state.reservationTimeStart = action.payload.reservationTimeStart;
       state.reservationTimeEnd = action.payload.reservationTimeEnd;
       state.address = action.payload.address;
-      state.petId = action.payload.pets;
+      state.petId = action.payload.petId;
+      state.pets = action.payload.pets;
+    },
+    setPetsitterId: (state, action) => {
+      state.petsitterId = action.payload;
     },
 
     addBody: (state, action) => {
@@ -41,9 +48,11 @@ export const reservationSlice = createSlice({
       state.address = '';
       state.body = '';
       state.petId = [];
+      state.petsitterId = '';
+      state.pets = [];
     },
   },
 });
 
-export const { setReservation, addBody, deleteReservation } = reservationSlice.actions;
+export const { setReservation, addBody, deleteReservation, setPetsitterId } = reservationSlice.actions;
 export default reservationSlice.reducer;

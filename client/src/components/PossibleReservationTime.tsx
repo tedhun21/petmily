@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
@@ -78,11 +79,6 @@ interface PossibleReservationTimeProps {
   setSelectedTimes: Dispatch<SetStateAction<string[]>>;
 }
 
-interface Schedule {
-  date: string;
-  time: string[];
-}
-
 const PossibleReservationTime: React.FC<PossibleReservationTimeProps> = ({
   selectedDate,
   setSelectedDate,
@@ -91,7 +87,10 @@ const PossibleReservationTime: React.FC<PossibleReservationTimeProps> = ({
 }) => {
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
 
+  const { petsitterId } = useParams();
+
   const handleTimeSelect = (time: string) => {
+    //12시간제로 변환 후 선택한 시간을 selectedTimes에 추가
     if (selectedTimes.includes(time)) {
       setSelectedTimes(selectedTimes.filter((t) => t !== time));
     } else {
@@ -101,16 +100,40 @@ const PossibleReservationTime: React.FC<PossibleReservationTimeProps> = ({
     }
   };
 
+  type Schedule = {
+    reservationId: number;
+    reservationDate: string;
+    reservationTimeStart: string;
+    reservationTimeEnd: string;
+    progress: string;
+  };
+
   useEffect(() => {
     const fetchBookedTimes = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/reservations/schedule/{petsitterId}`);
-        const schedulesOnSelectedDate = response.data.find(
-          (schedule: Schedule) => schedule.date === selectedDate?.format('YYYY-MM-DD'),
+        const response = await axios.get(`${apiUrl}/reservations/schedule/${petsitterId}`);
+
+        //HH:MM형태로 변환
+        const schedulesOnSelectedDate = response.data.filter(
+          (schedule: Schedule) => schedule.reservationDate === selectedDate?.format('YYYY-MM-DD'),
         );
 
-        if (schedulesOnSelectedDate) setBookedTimes(schedulesOnSelectedDate.time);
-        else setBookedTimes([]);
+        if (schedulesOnSelectedDate.length > 0) {
+          const times: string[] = [];
+          for (const schedule of schedulesOnSelectedDate) {
+            const startHour = parseInt(schedule.reservationTimeStart.slice(0, 2));
+            const endHour = parseInt(schedule.reservationTimeEnd.slice(0, 2));
+
+            for (let hour = startHour; hour < endHour; hour++) {
+              times.push(`${hour.toString().padStart(2, '0')}:00`);
+              times.push(`${hour.toString().padStart(2, '0')}:30`);
+            }
+          }
+
+          setBookedTimes(times);
+
+          // bookedTimes 배열 출력
+        } else setBookedTimes([]);
       } catch (error) {
         console.error(error);
       }
@@ -147,6 +170,7 @@ const PossibleReservationTime: React.FC<PossibleReservationTimeProps> = ({
                       selectedDate.isSame(currentDate, 'day') &&
                       parseInt(time.split(':')[0]) <= currentDate.hour()) ||
                     bookedTimes.includes(time);
+
                   return (
                     <Button
                       key={time}
@@ -169,6 +193,7 @@ const PossibleReservationTime: React.FC<PossibleReservationTimeProps> = ({
                       selectedDate.isSame(currentDate, 'day') &&
                       parseInt(time.split(':')[0]) <= currentDate.hour()) ||
                     bookedTimes.includes(time);
+
                   return (
                     <Button
                       key={time}
@@ -193,9 +218,9 @@ export default PossibleReservationTime;
 
 const MainContainer = styled.div`
   display: flex;
+  flex-direction: column;
   width: 100%;
   margin: 12px;
-  flex-direction: column;
 `;
 
 const StyledButtonGroup = styled.div`
@@ -205,8 +230,8 @@ const StyledButtonGroup = styled.div`
 
   & .MuiButton-root {
     width: calc((100% - (3 * 8px)) / 4);
-    text-align: center;
     margin: 0 8px 16px 0;
+    text-align: center;
   }
 
   &:last-of-type {

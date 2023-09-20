@@ -11,6 +11,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PersonPinIcon from '@mui/icons-material/PersonPin';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import PetsIcon from '@mui/icons-material/Pets';
+import CircularProgress from '@mui/joy/CircularProgress';
 
 // 디자인 수정
 
@@ -20,7 +21,7 @@ const token = getCookieValue('access_token');
 type InfoType = {
   petsitterId: number;
   possiblePetType: string;
-  possibleLocation: string;
+  possibleLocation: string[];
   possibleDay: string;
   possibleTimeStart: string;
   possibleTimeEnd: string;
@@ -31,14 +32,15 @@ type InfoType = {
 
 const MySchedule = () => {
   const { memberId } = useSelector((state: IUser) => state.user);
-  console.log(memberId);
 
   const [info, setInfo] = useState<InfoType>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   //   일정 확인용
   useEffect(() => {
     const fetchPetData = async () => {
-      console.log(token);
+      setIsLoading(true);
+
       try {
         const response = await axios.get(`${apiUrl}/members/petsitters`, {
           headers: {
@@ -46,16 +48,16 @@ const MySchedule = () => {
           },
         });
         if (response.data) {
-          // console.log(response.data);
           setInfo(response.data);
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchPetData();
   }, []);
-  console.log(info);
 
   // 케어가능 펫
   const getPetTypeDisplayText = (type: string) => {
@@ -108,7 +110,9 @@ const MySchedule = () => {
     <Container>
       <Text>나의 스케쥴</Text>
 
-      {info && info.possibleDay ? (
+      {isLoading ? (
+        <CircularProgress variant="soft" sx={{ color: '#279eff' }} />
+      ) : info && info.possibleDay ? (
         <PetmilyCard>
           <ContentContainer>
             <InfoWrapper>
@@ -123,7 +127,7 @@ const MySchedule = () => {
               <Location />
               <Info>
                 <InfoText>케어 가능 지역 </InfoText>
-                <UserText>{info.possibleLocation.replace(/[[\]]/g, '')}</UserText>
+                <UserText>{info.possibleLocation}</UserText>
               </Info>
             </InfoWrapper>
 
@@ -190,23 +194,23 @@ const InfoWrapper = styled.div`
 `;
 
 const Paw = styled(PetsIcon)`
-  color: #279eff;
   margin: 20px;
+  color: #279eff;
 `;
 
 const Time = styled(AccessTimeIcon)`
-  color: #279eff;
   margin: 20px;
+  color: #279eff;
 `;
 
 const Location = styled(PersonPinIcon)`
-  color: #279eff;
   margin: 20px;
+  color: #279eff;
 `;
 
 const Calendar = styled(EventAvailableIcon)`
-  color: #279eff;
   margin: 20px;
+  color: #279eff;
 `;
 
 const Info = styled.div`
@@ -230,16 +234,16 @@ const UserText = styled.div`
 `;
 
 const ContentContainer = styled.div`
-  padding: 0px20px;
   display: flex;
   flex-direction: column;
+  padding: 0px20px;
 `;
 
 const NoContentContaier = styled.div`
-  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 20px;
 `;
 
 const ButtonContainer = styled.div`

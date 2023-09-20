@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
@@ -10,18 +10,8 @@ import { notice, verificationNotice, impossibleNotice1, impossibleNotice2 } from
 import { useSelector, useDispatch } from 'react-redux';
 import { IReservation, addBody } from 'store/reservationSlice';
 import { IUser } from 'store/userSlice';
-
-const PetsitterItem = [
-  // 펫시터 정보 DB 받아올 예정
-  {
-    id: 1,
-    name: '리나',
-    location: '서울시 성북구',
-    rating: 4.9,
-    review: 10,
-    photo: '/imgs/PetsitterPhoto.svg',
-  },
-];
+import { getCookieValue } from 'hooks/getCookie';
+import axios from 'axios';
 
 const PetItem = [
   {
@@ -54,10 +44,56 @@ type PetItem = {
   photo: string;
 };
 
-const ReservationStepThree = () => {
+const apiUrl = process.env.REACT_APP_API_URL;
+const BucketUrl = process.env.REACT_APP_BUCKET_URL || '';
+
+interface IPetsitter {
+  name: string;
+  star: number;
+  reviewCount: number;
+  photo: string;
+  possibleLocation: string[];
+}
+
+const ReservationStepFour = () => {
   const [isChecked, setIsChecked] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [petsitter, setPetsitter] = useState<IPetsitter | null>(null);
   const [isConfirmEnabled, setIsConfirmEnabled] = useState(false); //예약하기 버튼 활성화 상태
+  const {
+    register,
+    formState: { errors },
+  } = useForm<IFormInput>();
+
+  // 예약 정보 가져오기
+  const { reservationDay, reservationTimeStart, reservationTimeEnd, address, body, petId } = useSelector(
+    (state: IReservation) => state.reservation,
+  );
+  const { name, nickName, phone } = useSelector((state: IUser) => state.user);
+  const dispatch = useDispatch();
+
+  // 폰번호 자르기
+  const phoneNum = `010-${phone.substring(3, 7)}-${phone.substring(7)}`;
+
+  // 펫 정보 상태값
+  const [petData, setPetData] = useState<IPet[]>([]);
+  // const petNum = pets.length;
+
+  //  펫시터 정보 가져오기
+  const { petsitterId } = useSelector((state: IReservation) => state.reservation);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/members/petsitters/${petsitterId}`);
+        setPetsitter(response.data as IPetsitter);
+      } catch (error) {
+        console.error('error', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // useEffect -> 펫 정보 가져오기
 
   const handleModalOpen = () => {
     setIsModalOpen(true);
@@ -80,28 +116,16 @@ const ReservationStepThree = () => {
     body: string;
   }
 
-  const {
-    register,
-    formState: { errors },
-  } = useForm<IFormInput>();
+  interface IPet {
+    name: string;
+    species: string;
+    age: number;
+  }
 
-  const { reservationDay, reservationTimeStart, reservationTimeEnd, address, body, petId } = useSelector(
-    (state: IReservation) => state.reservation,
-  );
-  const { name, nickName, phone } = useSelector((state: IUser) => state.user);
-  const dispatch = useDispatch();
+  // useEffect(() => {
+  //   const token = getCookieValue('access_token');
 
-  console.log(reservationDay);
-  console.log(reservationTimeStart);
-  console.log(reservationTimeEnd);
-  console.log(address);
-  console.log(body);
-  console.log(petId);
-  console.log(phone);
-
-  // 폰번호 자르기
-  const phoneNum = `010-${phone.substring(3, 7)}-${phone.substring(7)}`;
-  console.log(phoneNum);
+  // }, []);
 
   return (
     <MainContainer>
@@ -118,25 +142,27 @@ const ReservationStepThree = () => {
           <CheckTitleIcon src="/imgs/ReservationCheckList.svg" alt="CheckListIcon" />
         </CheckTitle>
 
-        {PetsitterItem.map((item) => (
-          <PetsitterCard key={item.id}>
-            <CardWrap>
-              <PetsitterName>{item.name}</PetsitterName>
-              <Petsitter>펫시터</Petsitter>
-            </CardWrap>
-            <PetsitterImg src={item.photo} alt="PetsitterPhoto" />
-            <PetsitterCardBody>
-              <RatingImg src="/imgs/Star.svg" alt="Star" />
-              <RatingCount>{item.rating}</RatingCount>
-              <ReviewImg src="/imgs/ReviewIcon.svg" alt="ReviewIcon" />
-              <ReviewCount>{item.review}</ReviewCount>
-            </PetsitterCardBody>
-            <DividerWrap>
-              <StyledDivider />
-            </DividerWrap>
-            <PetsitterLocation>{item.location}</PetsitterLocation>
-          </PetsitterCard>
-        ))}
+        <PetsitterCard>
+          {petsitter && (
+            <>
+              <CardWrap>
+                <PetsitterName>{petsitter.name}</PetsitterName>
+                <Petsitter>펫시터</Petsitter>
+              </CardWrap>
+              <PetsitterImg src={petsitter.photo.replace(/https:\/\/bucketUrl/g, BucketUrl)} alt="PetsitterPhoto" />
+              <PetsitterCardBody>
+                <RatingImg src="/imgs/Star.svg" alt="Star" />
+                <RatingCount>{petsitter.star}</RatingCount>
+                <ReviewImg src="/imgs/ReviewIcon.svg" alt="ReviewIcon" />
+                <ReviewCount>{petsitter.reviewCount}</ReviewCount>
+              </PetsitterCardBody>
+              <DividerWrap>
+                <StyledDivider />
+              </DividerWrap>
+              <PetsitterLocation>{petsitter.possibleLocation}</PetsitterLocation>
+            </>
+          )}
+        </PetsitterCard>
 
         <ReservationResult>
           <TitleWrap>
@@ -266,7 +292,7 @@ const ReservationStepThree = () => {
   );
 };
 
-export default ReservationStepThree;
+export default ReservationStepFour;
 
 const MainContainer = styled.div`
   display: flex;
@@ -277,9 +303,9 @@ const MainContainer = styled.div`
 
 const Header = styled.div`
   display: block;
-  margin: -54px 0 18px 60px;
-  position: relative;
   align-items: center;
+  position: relative;
+  margin: -54px 0 18px 60px;
   min-height: 64px;
 `;
 
@@ -314,18 +340,18 @@ const CheckTitleIcon = styled.img``;
 
 const PetsitterCard = styled.div`
   position: relative;
-  border-radius: 8px;
   margin: 40px auto 16px;
   padding-bottom: 20px;
+  border-radius: 8px;
   box-shadow: ${(props) => props.theme.shadow.dp01};
 `;
 
 const CardWrap = styled.div`
   display: flex;
   position: relative;
-  background-color: ${(props) => props.theme.colors.mainBlue};
-  border-radius: 8px 8px 0 0;
   padding: 12px 0 12px 36px;
+  border-radius: 8px 8px 0 0;
+  background-color: ${(props) => props.theme.colors.mainBlue};
 `;
 
 const PetsitterName = styled.h2`
@@ -342,12 +368,12 @@ const Petsitter = styled.h3`
 `;
 
 const PetsitterImg = styled.img`
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
   position: absolute;
   top: 16px;
   right: 14%;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
 `;
 
 const PetsitterCardBody = styled.div`
@@ -358,8 +384,8 @@ const PetsitterCardBody = styled.div`
 
 const DividerWrap = styled.div`
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   margin-top: -20px;
 `;
 
@@ -397,8 +423,8 @@ const ReviewCount = styled.h4`
 
 const DividerContainer = styled.div`
   display: flex;
-  padding: 0 40px;
   margin-top: -14px;
+  padding: 0 40px;
 `;
 
 const PetsitterLocation = styled.h4`
@@ -409,10 +435,10 @@ const PetsitterLocation = styled.h4`
 
 const ReservationResult = styled.div`
   display: flex;
-  padding: 24px 0 24px 0;
-  border-radius: 8px;
   align-items: center;
   justify-content: center;
+  padding: 24px 0;
+  border-radius: 8px;
   background-color: ${(props) => props.theme.colors.white};
   box-shadow: ${(props) => props.theme.shadow.dp01};
 `;
@@ -468,11 +494,11 @@ const ReservationTime = styled.div`
 const PetCard = styled.div`
   display: flex;
   flex-direction: column;
+  margin-top: 20px;
+  padding-bottom: 20px;
   border-radius: 8px;
   background-color: ${(props) => props.theme.colors.white};
   box-shadow: ${(props) => props.theme.shadow.dp01};
-  margin-top: 20px;
-  padding-bottom: 20px;
 `;
 
 const PetCardTitle = styled.h3`
@@ -485,24 +511,24 @@ const PetCardTitle = styled.h3`
 const PetWrap = styled.div`
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   margin-top: 12px;
   margin-right: 80px;
   margin-bottom: 40px;
-  justify-content: space-between;
 `;
 
 const PetImg = styled.img`
   width: 70px;
   height: 70px;
-  border-radius: 50%;
   margin: 8px 16px 0 0;
+  border-radius: 50%;
 `;
 
 const PetInfo = styled.div`
   display: flex;
   flex-direction: column;
-  white-space: nowrap;
   margin-top: 8px;
+  white-space: nowrap;
 `;
 
 const MaleIcon = styled.img<{ isMale: boolean }>`
@@ -516,10 +542,10 @@ const MaleIcon = styled.img<{ isMale: boolean }>`
 
 const PetName = styled.h3`
   display: flex;
-  font-weight: ${(props) => props.theme.fontWeights.bold};
-  font-size: ${(props) => props.theme.fontSize.s20h30};
   margin-top: 4px;
   margin-bottom: 2px;
+  font-weight: ${(props) => props.theme.fontWeights.bold};
+  font-size: ${(props) => props.theme.fontSize.s20h30};
 `;
 
 const WrapText = styled.div`
@@ -528,17 +554,17 @@ const WrapText = styled.div`
 
 const PetSpecies = styled.div`
   display: flex;
-  font-weight: ${(props) => props.theme.fontWeights.normal};
-  font-size: ${(props) => props.theme.fontSize.s12h18};
   margin-right: 4px;
   color: ${(props) => props.theme.textColors.gray40};
+  font-weight: ${(props) => props.theme.fontWeights.normal};
+  font-size: ${(props) => props.theme.fontSize.s12h18};
 `;
 
 const PetAge = styled.div`
   display: flex;
+  color: ${(props) => props.theme.textColors.gray40};
   font-weight: ${(props) => props.theme.fontWeights.normal};
   font-size: ${(props) => props.theme.fontSize.s12h18};
-  color: ${(props) => props.theme.textColors.gray40};
 `;
 
 const CustomCarousel = styled(Carousel)`
@@ -558,14 +584,13 @@ const CustomCarousel = styled(Carousel)`
 const RequestContainer = styled.div`
   margin: 16px 0;
   padding: 36px;
+  border-radius: 8px;
   background-color: ${(props) => props.theme.colors.white};
   box-shadow: ${(props) => props.theme.shadow.dp01};
-  border-radius: 8px;
 `;
 
 const ScheduleText = styled.h2`
-  margin: 8px 0 12px 0;
-
+  margin: 8px 0 12px;
   ${(props) => props.theme.fontSize.s16h24};
   font-weight: ${(props) => props.theme.fontWeights.extrabold};
   color: #595959;
@@ -574,9 +599,9 @@ const ScheduleText = styled.h2`
 
 const StyledTextField = styled(TextField)`
   .MuiInputLabel-root {
-    font-size: 14px;
     margin-top: 3px;
     color: #d9d9d9;
+    font-size: 14px;
   }
 `;
 
@@ -603,11 +628,11 @@ const ContactSubText = styled.div`
 
 const ConfirmContainer = styled.div`
   display: flex;
-  border-top: 1px solid #e0e0e0;
-  border-bottom: 1px solid #e0e0e0;
+  justify-content: center;
   margin-bottom: 20px;
   background-color: ${(props) => props.theme.colors.white};
-  justify-content: center;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
 `;
 
 const Textbox = styled.div`
@@ -616,20 +641,20 @@ const Textbox = styled.div`
 
 const ConfirmText = styled.div`
   ${(props) => props.theme.fontSize.s16h24}
-  margin: 16px 0 4px 0;
+  margin: 16px 0 4px;
 `;
 
 const WarningText = styled.div`
   ${(props) => props.theme.fontSize.s12h18}
   color: ${(props) => props.theme.textColors.primary};
-  margin: 0 0 16px 0;
+  margin: 0 0 16px;
 `;
 
 const ButtonContainer = styled.div`
-  margin: 0 24px 20px 24px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  margin: 0 24px 20px;
 `;
 
 const StyledButton = styled.button`
@@ -645,9 +670,11 @@ const StyledButton = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
+
   &:hover {
     background-color: ${({ theme }) => theme.colors.subBlue};
   }
+
   &:active {
     background-color: ${({ theme }) => theme.colors.darkBlue};
     box-shadow: ${({ theme }) => theme.shadow.inset};
