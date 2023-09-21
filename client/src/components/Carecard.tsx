@@ -36,6 +36,7 @@ const CareCard = ({ reservation }: any) => {
     }
   };
 
+  console.log(reservation);
   // 펫시터 예약 취소 (예약 확정 상태)
   const handleSitterCancel = async () => {
     try {
@@ -58,6 +59,10 @@ const CareCard = ({ reservation }: any) => {
             const response = await axios.patch(`${apiUrl}/reservations/${reservation.reservationId}/petsittercancel`, {
               headers: { Authorization: `Bearer ${newAccessToken}` },
             });
+            if (response.status === 200) {
+              alert('예약이 취소되었습니다.');
+              navigate('/cares');
+            }
           }
         } catch (error) {}
       }
@@ -159,7 +164,7 @@ const CareCard = ({ reservation }: any) => {
             </>
           ) : petsitterBoolean && reservation.progress === 'RESERVATION_CANCELLED' ? (
             <>
-              <InActiveButton>고객에 의해 취소</InActiveButton>
+              <InActiveButton>취소된 예약</InActiveButton>
             </>
           ) : petsitterBoolean && reservation.progress === 'FINISH_CARING' ? (
             <>
@@ -177,7 +182,7 @@ const CareCard = ({ reservation }: any) => {
             </>
           ) : !petsitterBoolean && reservation.progress === 'RESERVATION_CANCELLED' ? (
             <>
-              <InActiveButton>펫시터에 의해 취소</InActiveButton>
+              <InActiveButton>취소된 예약</InActiveButton>
             </>
           ) : !petsitterBoolean && reservation.progress === 'FINISH_CARING' ? (
             <>
