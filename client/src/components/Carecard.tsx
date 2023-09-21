@@ -45,7 +45,7 @@ const CareCard = ({ reservation }: any) => {
       });
       if (response.status === 200) {
         alert('예약이 취소되었습니다.');
-        navigate('/cares');
+        window.location.reload();
       }
     } catch (error: any) {
       console.log(error);
@@ -61,7 +61,7 @@ const CareCard = ({ reservation }: any) => {
             });
             if (response.status === 200) {
               alert('예약이 취소되었습니다.');
-              navigate('/cares');
+              window.location.reload();
             }
           }
         } catch (error) {}
@@ -82,7 +82,7 @@ const CareCard = ({ reservation }: any) => {
 
       if (response.status === 200) {
         alert('예약이 취소 되었습니다.');
-        navigate('/cares');
+        window.location.reload();
       }
     } catch (error: any) {
       console.log(error);
@@ -99,7 +99,7 @@ const CareCard = ({ reservation }: any) => {
             );
             if (response) {
               alert('예약이 취소 되었습니다.');
-              navigate('/cares');
+              window.location.reload();
             }
           }
         } catch (error) {
@@ -186,7 +186,11 @@ const CareCard = ({ reservation }: any) => {
             </>
           ) : !petsitterBoolean && reservation.progress === 'FINISH_CARING' ? (
             <>
-              <ActiveLink to={`/cares/${memberId}`}>케어일지</ActiveLink>
+              {reservation.journalId ? (
+                <ActiveLink to={`/cares/journal/${reservation.journalId}`}>케어일지</ActiveLink>
+              ) : (
+                <InActiveButton>케어일지</InActiveButton>
+              )}
               <ActiveLink to={`/cares/${reservation.reservationId}/review`}>후기</ActiveLink>
             </>
           ) : null}
