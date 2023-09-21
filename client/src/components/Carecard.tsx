@@ -36,7 +36,6 @@ const CareCard = ({ reservation }: any) => {
     }
   };
 
-  console.log(reservation);
   // 펫시터 예약 취소 (예약 확정 상태)
   const handleSitterCancel = async () => {
     try {
@@ -115,7 +114,7 @@ const CareCard = ({ reservation }: any) => {
         <div>
           <PetsitterContainer>
             <PetsitterInfo>
-              <div>{petsitterBoolean ? reservation.name : reservation.petsitterName}</div>
+              <div>{petsitterBoolean ? reservation.memberName : reservation.petsitterName}</div>
               <div>{petsitterBoolean ? '고객님' : '펫시터님'}</div>
             </PetsitterInfo>
           </PetsitterContainer>
@@ -176,7 +175,7 @@ const CareCard = ({ reservation }: any) => {
               <InActiveButton>예약신청</InActiveButton>
               <ActiveButton onClick={handleClientCancel}>취소하기</ActiveButton>
             </>
-          ) : !petsitterBoolean && reservation.progress === 'RESERVATION_CONFIRM' ? (
+          ) : !petsitterBoolean && reservation.progress === 'RESERVATION_CONFIRMED' ? (
             <>
               <InActiveButton>예약확정</InActiveButton>
             </>
