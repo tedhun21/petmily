@@ -19,7 +19,7 @@ const CreateJournal = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isRegisterLoading, setIsRegisterLoading] = useState(false);
 
-  const [reservation, setReservation] = useState<any>({});
+  const [reservation, setReservation] = useState<any>();
   const [journal, setJournal] = useState<any>();
   const [journalImages, setJournalImages] = useState([]);
 
@@ -57,7 +57,6 @@ const CreateJournal = () => {
     }
   };
 
-  console.log(selectedFiles);
   // 일지 등록
   const handleSubmit = async () => {
     const accessToken = getCookieValue('access_token');
@@ -127,16 +126,18 @@ const CreateJournal = () => {
       selectedFiles.map((file) => formData.append('file', file));
     }
 
-    try {
-      const response = await axios.patch(`${apiUrl}/journals/${journal?.journalId}`, formData, {
-        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'multipart/form-data' },
-      });
-      if (response.status === 200) {
-        alert('일지가 수정되었습니다.');
-        navigate(-1);
+    if (journal.journalId) {
+      try {
+        const response = await axios.patch(`${apiUrl}/journals/${journal?.journalId}`, formData, {
+          headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'multipart/form-data' },
+        });
+        if (response.status === 200) {
+          alert('일지가 수정되었습니다.');
+          navigate(-1);
+        }
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
     }
 
     setIsRegisterLoading(false);
@@ -174,6 +175,8 @@ const CreateJournal = () => {
               },
             });
             setJournal(response.data);
+            setJournalText(response.data.body);
+
             if (response.data.petPhotos) {
               const modifiedJournalImages = response.data.petPhotos.map((photo: any) => {
                 if (photo.includes('https://bucketUrl')) {
@@ -206,7 +209,6 @@ const CreateJournal = () => {
     }
   }, [reservation]);
 
-  console.log(reservation);
   return (
     <MainContainer>
       <TitleReservationContainer>
@@ -214,7 +216,7 @@ const CreateJournal = () => {
         <ReservationContainer>
           <FirstLine>
             <InfoContainer>
-              {reservation.petsitter?.photo ? (
+              {reservation?.petsitter?.photo ? (
                 <Photo src={reservation?.petsitter?.photo.replace('https://bucketUrl', bucketUrl)} alt="client" />
               ) : (
                 <DefaultImg src="/imgs/User.svg" alt="default img" />
