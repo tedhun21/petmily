@@ -19,7 +19,7 @@ const ReservationStepTwo = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { reservationDay, reservationTimeStart, reservationTimeEnd, address, petId } = useSelector(
+  const { reservationDay, reservationTimeStart, reservationTimeEnd, address, petId, pets } = useSelector(
     (state: IReservation) => state.reservation,
   );
 
@@ -44,6 +44,13 @@ const ReservationStepTwo = () => {
     setFilterType(filterText);
     setIsFilterOpen(false);
   };
+
+  useEffect(() => {
+    if (!reservationDay || !reservationTimeStart || !reservationTimeEnd || !address || !petId) {
+      alert('예약을 처음부터 해주세요.');
+      navigate('/reservation');
+    }
+  }, []);
 
   useEffect(() => {
     if (filterType === '요청한 예약 날짜에 맞는 펫시터') {

@@ -2,14 +2,15 @@ import styled from 'styled-components';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { setReservation, setPetsitterId } from 'store/reservationSlice';
+import { setReservation, setPetsitterId, IReservation } from 'store/reservationSlice';
 import axios from 'axios';
 
 import { getCookieValue } from 'hooks/getCookie';
 import { refreshAccessToken } from 'hooks/refreshAcessToken';
 import { IUser } from 'store/userSlice';
-
 import Button from '@mui/material/Button';
+import CloseIcon from '@mui/icons-material/Close';
+import Divider from '@mui/material/Divider';
 
 import Reviews from '@components/Reviews';
 import PossibleReservationTime from '@components/PossibleReservationTime';
@@ -81,6 +82,9 @@ const PetsitterViewDetails = () => {
   const [petsitterData, setPetsitterData] = useState<any>({});
 
   const { isLogin, memberId, petsitterBoolean } = useSelector((state: IUser) => state.user);
+  const { reservationDay, reservationTimeStart, reservationTimeEnd, address, petId, pets } = useSelector(
+    (state: IReservation) => state.reservation,
+  );
 
   const handleResetReservationClick = () => {
     setSelectedDates(null);
@@ -134,6 +138,9 @@ const PetsitterViewDetails = () => {
         reservationDay: selectedDates ? selectedDates.format('YYYY-MM-DD') : '',
         reservationTimeStart: selectedTimes.length > 0 ? selectedTimes[0] : '',
         reservationTimeEnd: selectedTimes.length > 0 ? selectedTimes[selectedTimes.length - 1] : '',
+        address,
+        petId,
+        pets,
       }),
     );
 
@@ -240,7 +247,7 @@ const PetsitterViewDetails = () => {
         </TabContentContainer>
         {selectedDates && selectedTimes && (
           <ConfirmationSection>
-            <ConfirmationText>예약확인</ConfirmationText>
+            <Divider>선택 내역</Divider>
             <ConfirmationDate>
               예약 날짜: {selectedDates ? selectedDates.format('YYYY-MM-DD') : '날짜를 선택하세요'}
             </ConfirmationDate>
@@ -457,23 +464,17 @@ const ConfirmationSection = styled.div`
   justify-content: center;
   align-items: center;
   text-align: center;
-  margin-bottom: 16px;
-`;
-
-const ConfirmationText = styled.div`
-  color: ${(props) => props.theme.colors.white};
-  background-color: ${(props) => props.theme.colors.mainBlue};
-  margin-bottom: 48px;
-  padding: 12px;
-  border-radius: 8px;
+  gap: 20px;
+  border-radius: 0 0 8px 8px;
 `;
 
 const ConfirmationDate = styled.div`
-  margin-bottom: 16px;
+  margin-top: 12px;
+  margin-bottom: 8px;
 `;
 
 const ConfirmationTime = styled.div`
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 `;
 
 const StyledCancelButton = styled(Button)``;
