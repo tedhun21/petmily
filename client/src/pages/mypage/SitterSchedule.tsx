@@ -66,7 +66,7 @@ const SitterSchedule = () => {
         });
         if (response.data) {
           const data = response.data;
-
+          console.log(data);
           // 케어 가능한 펫
           setValue('possiblePetType', data.possiblePetType || '');
           // 케어 가능 요일

@@ -116,7 +116,7 @@ const ReservationStepFour = () => {
       petId,
       petsitterId: petsitterIdNumber,
     };
-
+    console.log(requestBody);
     try {
       const response = await axios.post(`${apiUrl}/reservations/`, requestBody, {
         headers: {

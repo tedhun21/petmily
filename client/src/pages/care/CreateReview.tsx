@@ -177,7 +177,6 @@ const CreateReview = () => {
     }
   }, []);
 
-  console.log(reservation);
   // 리뷰 1개 조회
   useEffect(() => {
     if (reservation?.reviewId) {
