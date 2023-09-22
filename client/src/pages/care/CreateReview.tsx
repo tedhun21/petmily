@@ -121,7 +121,6 @@ const CreateReview = () => {
       const response = await axios.patch(`${apiUrl}/reviews/${review?.reviewId}`, formData, {
         headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'multipart/form-data' },
       });
-      console.log(response);
       if (response.status === 200) {
         alert('리뷰가 수정되었습니다.');
         navigate(-1);
@@ -188,7 +187,7 @@ const CreateReview = () => {
             setReviewText(res.data.body);
             setStar(res.data.star);
 
-            const photos = res.data.photos;
+            const photos = res.data.reviewPhotos;
             if (photos) {
               const modifiedReviewImages = photos.map((photoUrl: any) => {
                 if (photoUrl.includes('https://bucketUrl')) {
@@ -204,8 +203,6 @@ const CreateReview = () => {
       }
     }
   }, [reservation]);
-
-  console.log(review);
 
   return (
     <MainContainer>
