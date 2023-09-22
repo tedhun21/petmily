@@ -177,6 +177,7 @@ const CreateReview = () => {
     }
   }, []);
 
+  console.log(reservation);
   // 리뷰 1개 조회
   useEffect(() => {
     if (reservation?.reviewId) {
@@ -212,7 +213,7 @@ const CreateReview = () => {
           <FirstLine>
             <Info>
               {reservation?.photo ? (
-                <Photo src={reservation.member.photo.replace('https://bucketUrl', bucketUrl)} alt="petsitter" />
+                <Photo src={reservation.petsitter.photo.replace('https://bucketUrl', bucketUrl)} alt="petsitter" />
               ) : (
                 <DefaultImg src="/imgs/User.svg" alt="default img" />
               )}
